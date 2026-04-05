@@ -74,8 +74,8 @@ export default function Level2({ onBack }) {
 
   if (phase === 'result') {
     const total = mcScore + timedScore
-    const maxTotal = 20
-    const emoji = total >= 18 ? '🏆' : total >= 14 ? '🥈' : total >= 10 ? '🥉' : '💪'
+    const maxTotal = 15
+    const emoji = total >= 13 ? '🏆' : total >= 10 ? '🥈' : total >= 7 ? '🥉' : '💪'
     return (
       <div className="page">
         <div className="result-screen" style={{ width: '100%' }}>
@@ -83,7 +83,7 @@ export default function Level2({ onBack }) {
           <h1>게임 완료!</h1>
           <div className="card" style={{ width: '100%' }}>
             <p style={{ fontSize: 18, color: '#888', marginBottom: 8 }}>{info.label} 결과</p>
-            <div style={{ fontSize: 22, margin: '8px 0' }}>🔵 객관식: <strong>{mcScore} / 10</strong></div>
+            <div style={{ fontSize: 22, margin: '8px 0' }}>🔵 객관식: <strong>{mcScore} / 5</strong></div>
             <div style={{ fontSize: 22, margin: '8px 0' }}>⏱ 주관식: <strong>{timedScore} / 10</strong></div>
             <div className="result-score" style={{ marginTop: 12 }}>
               총점: {total} / {maxTotal}
@@ -107,7 +107,7 @@ export default function Level2({ onBack }) {
         </span>
       </div>
 
-      {phase === 'mc' && <MCGame onFinish={handleMcFinish} />}
+      {phase === 'mc' && <MCGame stage={stage} onFinish={handleMcFinish} />}
       {phase === 'timed' && <TimedGame stage={stage} onFinish={handleTimedFinish} />}
     </div>
   )

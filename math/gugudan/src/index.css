@@ -21,28 +21,45 @@
 
 body {
   font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
-  background: var(--bg);
+  background: #ddd8cc;
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
 }
 
 #root {
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: var(--bg);
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  #root {
+    box-shadow: 0 0 40px rgba(0,0,0,0.15);
+  }
 }
 
 /* === Layout === */
 .page {
   width: 100%;
-  max-width: 680px;
-  padding: 20px 16px;
+  padding: 16px 16px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .page {
+    padding: 20px 24px 40px;
+    gap: 16px;
+  }
 }
 
 /* === Buttons === */
@@ -383,6 +400,7 @@ h3 { font-size: 22px; font-weight: 700; }
   top: 0;
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  flex-shrink: 0;
 }
 
 .app-header-title {
