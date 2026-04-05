@@ -30,6 +30,23 @@ export function generateWrongAnswersLarge(correct, count = 3) {
   return [...wrongs].slice(0, count);
 }
 
+// Weighted random from arbitrary ordered list: later index = higher weight
+// e.g. [2, 5, 3, 7] → 7 gets weight 4, 3 gets weight 3, 5 gets 2, 2 gets 1
+export function weightedRandomFromList(orderedList) {
+  let total = 0;
+  const entries = orderedList.map((dan, i) => {
+    const w = i + 1;
+    total += w;
+    return { dan, weight: w };
+  });
+  let rand = Math.random() * total;
+  for (const { dan, weight } of entries) {
+    rand -= weight;
+    if (rand <= 0) return dan;
+  }
+  return orderedList[orderedList.length - 1];
+}
+
 // Weighted random dan: higher dan = higher weight
 // weights: 2단=1, 3단=2, ..., maxDan=(maxDan-1)
 export function weightedRandomDan(maxDan) {

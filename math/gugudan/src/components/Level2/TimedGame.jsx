@@ -17,14 +17,18 @@ export default function TimedGame({ stage, onFinish }) {
   const [idx, setIdx] = useState(0)
   const [value, setValue] = useState('')
   const [timeLeft, setTimeLeft] = useState(timeLimit)
-  const [feedback, setFeedback] = useState(null) // null | 'correct' | 'wrong'
+  const [feedback, setFeedback] = useState(null)
   const [score, setScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
   const [mood, setMood] = useState('normal')
   const timerRef = useRef(null)
   const inputRef = useRef(null)
+  const gameOverRef = useRef(false)
+  const scoreRef = useRef(0)
 
   useEffect(() => {
+    gameOverRef.current = false
+    setTimeLeft(timeLimit)
     startTimer()
     return () => clearInterval(timerRef.current)
   }, [idx])
@@ -38,17 +42,22 @@ export default function TimedGame({ stage, onFinish }) {
     setTimeLeft(timeLimit)
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
-        if (t <= 1) {
+        const next = Math.max(0, parseFloat((t - 0.1).toFixed(1)))
+        if (next <= 0) {
           clearInterval(timerRef.current)
-          handleTimeout()
+          setTimeout(() => {
+            if (!gameOverRef.current) handleTimeout()
+          }, 0)
           return 0
         }
-        return t - 1
+        return next
       })
-    }, 1000)
+    }, 100)
   }
 
   function handleTimeout() {
+    if (gameOverRef.current) return
+    gameOverRef.current = true
     playTimeout()
     setMood('sad')
     setGameOver(true)
@@ -58,14 +67,17 @@ export default function TimedGame({ stage, onFinish }) {
     e.preventDefault()
     if (feedback !== null || gameOver) return
     clearInterval(timerRef.current)
+    gameOverRef.current = true // prevent timeout race
 
     const num = parseInt(value, 10)
     const q = questions[idx]
+    const isCorrect = num === q.answer
 
-    if (num === q.answer) {
+    if (isCorrect) {
       setFeedback('correct')
       setMood('happy')
-      setScore(s => s + 1)
+      scoreRef.current += 1
+      setScore(scoreRef.current)
       playCorrect()
     } else {
       setFeedback('wrong')
@@ -75,9 +87,10 @@ export default function TimedGame({ stage, onFinish }) {
 
     setTimeout(() => {
       if (idx + 1 >= TOTAL) {
-        onFinish(score + (num === q.answer ? 1 : 0))
+        onFinish(scoreRef.current)
         return
       }
+      gameOverRef.current = false
       setIdx(i => i + 1)
       setValue('')
       setFeedback(null)
@@ -118,14 +131,21 @@ export default function TimedGame({ stage, onFinish }) {
         <div className="progress-bar-fill" style={{ width: `${(idx / TOTAL) * 100}%` }} />
       </div>
 
-      {/* Timer */}
+      {/* Smooth timer bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <span style={{ fontSize: 20 }}>⏱</span>
         <div className="timer-bar-bg" style={{ flex: 1 }}>
-          <div className={`timer-bar-fill ${timerClass}`} style={{ width: `${pct}%` }} />
+          <div
+            className={`timer-bar-fill ${timerClass}`}
+            style={{ width: `${pct}%`, transition: 'width 0.1s linear' }}
+          />
         </div>
-        <span style={{ fontWeight: 900, fontSize: 22, minWidth: 36, color: pct < 25 ? '#e03030' : '#333' }}>
-          {timeLeft}s
+        <span style={{
+          fontWeight: 900, fontSize: 22, minWidth: 48,
+          color: pct < 25 ? '#e03030' : pct < 50 ? '#FF9F45' : '#333',
+          transition: 'color 0.3s',
+        }}>
+          {timeLeft.toFixed(1)}s
         </span>
       </div>
 

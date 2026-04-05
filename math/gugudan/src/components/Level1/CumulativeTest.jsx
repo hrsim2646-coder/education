@@ -1,18 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
-import { weightedRandomDan, shuffle } from '../../utils/math'
+import { weightedRandomFromList } from '../../utils/math'
 import { playCorrect, playWrong } from '../../utils/sound'
 
 const TOTAL = 10
 
-function makeQuestion(maxDan) {
-  const dan = weightedRandomDan(maxDan)
+function makeQuestion(learnedDans) {
+  const dan = weightedRandomFromList(learnedDans)
   const k = Math.floor(Math.random() * 9) + 1
   return { dan, k, answer: dan * k }
 }
 
-export default function CumulativeTest({ maxDan, onNext }) {
+// learnedDans: ordered array, last element = most recently studied (highest weight)
+export default function CumulativeTest({ learnedDans, onNext }) {
   const [questions] = useState(() =>
-    Array.from({ length: TOTAL }, () => makeQuestion(maxDan))
+    Array.from({ length: TOTAL }, () => makeQuestion(learnedDans))
   )
   const [idx, setIdx] = useState(0)
   const [value, setValue] = useState('')
@@ -53,11 +54,13 @@ export default function CumulativeTest({ maxDan, onNext }) {
 
   if (idx >= questions.length) return null
 
+  const label = learnedDans.join(', ') + '단'
+
   return (
     <div className="card" style={{ borderTop: '6px solid #C77DFF' }}>
       <div style={{ marginBottom: 8 }}>
         <span style={{ background: '#C77DFF', color: '#fff', borderRadius: 10, padding: '4px 14px', fontWeight: 700 }}>
-          📝 누적 테스트 (2~{maxDan}단)
+          📝 누적 테스트 ({label})
         </span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', margin: '12px 0 8px' }}>

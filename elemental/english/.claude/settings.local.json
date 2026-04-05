@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C C:/Users/My/ai-project/education config --get remote.origin.url)",
+      "Bash(gh repo:*)",
+      "Bash(npm --version)",
+      "Bash(mkdir -p \"C:/Users/My/ai-project/education/math/gugudan\")",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
