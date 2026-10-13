@@ -6,3 +6,4 @@
 - 재빌드: `웹앱_빌드.bat` 또는 `python -I tools/lawapp/build_app.py` (PyMuPDF 필요: `pip install pymupdf`)
 - 다음 후보: 실제 고시 PDF 추가, 실제 개정본 비교 검증, `검수필요_띄어쓰기.txt` 검수→`DATA/text_overrides.json`, 연계 오분류 `DATA/links_manual.json` 보정, 문제 출제(`DATA/export/lawgraph.json` 활용), Open API(XML) 전환.
 - 상세: `README_웹앱.md`
+- 추가 기능(2026-10-14): 조문 하단 주석 날짜 필터(2023.12.31 이전 제외, 2026 진하게), 모바일 맞춤 레이아웃, 사용자 명칭 입히기(드래그→우클릭/하단버튼, 브라우저 저장+내보내기/가져오기). 상세: `README_웹앱.md`
