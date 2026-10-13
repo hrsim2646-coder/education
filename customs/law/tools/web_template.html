@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>관세법 연계뷰</title>
+<style>
+:root{
+  --bg:#f4f6fa; --panel:#fff; --ink:#1c2430; --mute:#6b7685; --line:#dfe4ec;
+  --law:#1f5fbf; --law-bg:#e8f0fc; --dec:#1b7f4b; --dec-bg:#e6f5ec; --rul:#c2570c; --rul-bg:#fdf0e3;
+  --gos:#6b7685; --gos-bg:#eef0f3; --mark:#fff2a8; --ref:#1f5fbf; --hit:#ffe08a;
+  --fs:15px;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#10141b; --panel:#171d27; --ink:#e6ebf3; --mute:#8d98a8; --line:#2a3342;
+    --law:#7db0ff; --law-bg:#17263d; --dec:#63d49a; --dec-bg:#132a20; --rul:#ffa65c; --rul-bg:#2d1f12;
+    --gos:#98a3b3; --gos-bg:#1e242e; --mark:#5a4d10; --ref:#7db0ff; --hit:#6b5500; }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:var(--fs)/1.65 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);
+  padding:calc(8px + env(safe-area-inset-top)) 16px 8px}
+.top{display:flex;align-items:center;gap:8px;max-width:1280px;margin:0 auto}
+h1{font-size:16px;margin:0;flex:1;letter-spacing:-.2px}
+h1 small{display:block;font-weight:400;font-size:11px;color:var(--mute)}
+.tool{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;min-width:38px;height:34px;font:inherit;font-size:13px;cursor:pointer}
+.tool[aria-pressed=true]{background:var(--ink);color:var(--panel)}
+.chips{display:flex;gap:6px;overflow-x:auto;max-width:1280px;margin:8px auto 0;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.chip[aria-selected=true]{background:var(--law);border-color:var(--law);color:#fff}
+main{max-width:1280px;margin:0 auto;padding:14px 16px 60px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--mute);margin:2px 0 10px}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.summary{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px}
+.summary b{font-weight:600}
+.flow-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:600}
+.pill.law{background:var(--law-bg);color:var(--law)} .pill.decree{background:var(--dec-bg);color:var(--dec)}
+.pill.rule{background:var(--rul-bg);color:var(--rul)} .pill.gos{background:var(--gos-bg);color:var(--gos)}
+.arrow{color:var(--mute)}
+.colhead{display:none}
+.flow{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.grp{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-bottom:14px}
+.cell.r{margin-left:18px;padding-left:12px;border-left:3px solid var(--rul-bg)}
+.cell.r>*+*{margin-top:8px}
+@media (min-width:1000px){
+  .flow{grid-template-columns:minmax(0,1fr) minmax(0,2fr);align-items:start;gap:18px}
+  .law-col{position:sticky;top:112px}
+  .colhead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;font-size:12px;font-weight:700;color:var(--mute);margin-bottom:6px}
+  .grp{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+  .cell.r{margin-left:0;padding-left:0;border-left:0}
+  .grp.has-r .cell.d{position:relative}
+  .grp.has-r .cell.d::after{content:"";position:absolute;right:-12px;top:22px;width:12px;border-top:2px solid var(--rul)}
+}
+.card{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;overflow:hidden;scroll-margin-top:130px}
+.card.law{--c:var(--law);--cbg:var(--law-bg)} .card.decree{--c:var(--dec);--cbg:var(--dec-bg)} .card.rule{--c:var(--rul);--cbg:var(--rul-bg)}
+.card.ref-only{opacity:.88;border-left-style:dashed}
+.card.flash{animation:fl 1.4s ease}
+@keyframes fl{0%,60%{box-shadow:0 0 0 3px var(--hit)}100%{box-shadow:none}}
+.ch{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;background:var(--cbg)}
+.badge{flex:none;background:var(--c);color:#fff;border-radius:6px;padding:1px 8px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.ttl{font-weight:650;line-height:1.4;flex:1;min-width:0}
+.ttl small{display:block;font-weight:400;font-size:11.5px;color:var(--mute);margin-top:1px}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.tag{font-size:11px;padding:0 7px;border-radius:999px;border:1px solid var(--c);color:var(--c);line-height:18px}
+.tag.k{border-color:var(--gos);color:var(--gos)}
+.cb{padding:8px 12px 12px;position:relative}
+.cb.clamp{max-height:11.5em;overflow:hidden}
+.cb.clamp::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3.2em;background:linear-gradient(transparent,var(--panel))}
+.more{display:block;width:100%;border:0;border-top:1px solid var(--line);background:transparent;color:var(--mute);padding:7px;font:inherit;font-size:12.5px;cursor:pointer}
+p.pa{margin:4px 0;word-break:keep-all;overflow-wrap:anywhere}
+p.l2{margin-left:1.1em} p.l3{margin-left:2.2em}
+mark.d{background:var(--mark);color:inherit;border-radius:3px;padding:0 2px}
+.ref{color:var(--ref);text-decoration:underline dotted;text-underline-offset:3px}
+.ref.go{cursor:pointer;font-weight:600}
+.ref.hit{background:var(--hit);border-radius:3px;font-weight:700;text-decoration:none}
+.quiz mark.d,.quiz .ref.hit{filter:blur(6px);cursor:pointer}
+.quiz mark.d.open,.quiz .ref.hit.open{filter:none}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:10px 12px;color:var(--mute);font-size:13px}
+.empty.k{background:var(--gos-bg);border-color:var(--gos)}
+details.ref-list{margin-top:6px}
+details.ref-list>summary{cursor:pointer;color:var(--mute);font-size:13px;padding:8px 0}
+.foot{margin-top:28px;font-size:12px;color:var(--mute);line-height:1.6}
+.notice{font-size:12.5px;color:var(--mute);margin:-4px 0 12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>관세법 법·령·칙 연계뷰<small id="basis"></small></h1>
+    <button class="tool" id="quizBtn" aria-pressed="false" title="위임 문구·근거 조문을 가려서 암기">가리기</button>
+    <button class="tool" id="fMinus" aria-label="글자 작게">가−</button>
+    <button class="tool" id="fPlus" aria-label="글자 크게">가+</button>
+  </div>
+  <nav class="chips" id="chips" role="tablist"></nav>
+</header>
+<main id="main"></main>
+
+<script>
+const DATA = /*DATA*/null;
+const META = /*META*/null;
+const KIND = {law:{label:'법',full:'관세법'}, decree:{label:'령',full:'시행령'}, rule:{label:'칙',full:'시행규칙'}};
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let cur = 0, idSeq = 0;
+
+$('#basis').textContent = META.basis;
+
+function fmt(text, c, idx){
+  const re = /(대통령령으로 정(?:하는|한다|하여|하고)|(?:재정경제부|기획재정부)령으로 정(?:하는|한다|하여)|관세청장이 (?:정하여 )?고시(?:하는|한다)?|고시)|((?:법|영)\s?)?제(\d+)조(?:의(\d+))?((?:제\d+항)?(?:제\d+호)?)/g;
+  return esc(text).replace(re, (m, deleg, pre, n, sub, tail) => {
+    if (deleg) return '<mark class="d">'+deleg+'</mark>';
+    const no = n + (sub ? '의'+sub : '');
+    const p = (pre||'').trim();
+    let kind = c.kind === 'law' ? 'law' : (p === '영' ? 'decree' : (p === '법' ? 'law' : c.kind));
+    if (c.kind === 'decree' && !p) kind = 'decree';
+    const tgt = idx[kind+'-'+no];
+    const hit = (p === '법' && kind === 'law' && no === DATA[cur].law.no);
+    return '<span class="ref'+(tgt?' go':'')+(hit?' hit':'')+'"'+(tgt?' data-t="'+tgt+'"':'')+'>'+m+'</span>';
+  });
+}
+
+function card(c, idx, opt={}){
+  const id = 'c'+(++idSeq);
+  if (!idx[c.kind+'-'+c.no]) idx[c.kind+'-'+c.no] = id;
+  const body = c.paras.map(p => '<p class="pa l'+Math.max(p.l,1)+'">'+fmt(p.t, c, idx)+'</p>').join('');
+  const long = c.paras.reduce((a,p)=>a+p.t.length,0) > 380;
+  const tags = [];
+  if (c.link) tags.push('<span class="tag">'+c.link+'</span>');
+  if (c.deleg.includes('령') && c.kind!=='decree') tags.push('<span class="tag">령에 위임</span>');
+  if (c.deleg.includes('칙')) tags.push('<span class="tag">칙에 위임</span>');
+  if (c.deleg.includes('고시')) tags.push('<span class="tag k">고시 포함</span>');
+  const loc = [c.chapter, c.section].filter(Boolean).join(' › ');
+  return '<article class="card '+c.kind+(c.link==='인용'?' ref-only':'')+'" id="'+id+'">'+
+    '<div class="ch"><span class="badge">'+KIND[c.kind].label+' 제'+c.no+'조</span>'+
+    '<div class="ttl">'+esc(c.title)+'<small>'+KIND[c.kind].full+(loc?' · '+esc(loc):'')+'</small>'+
+    (tags.length?'<div class="tags">'+tags.join('')+'</div>':'')+'</div></div>'+
+    '<div class="cb'+(long?' clamp':'')+'">'+body+'</div>'+
+    (long?'<button class="more">전문 보기 ▾</button>':'')+'</article>';
+}
+
+function render(i){
+  cur = i; idSeq = 0;
+  const c = DATA[i], idx = {};
+  const main = $('#main');
+  const dMain = c.decrees.filter(d => d.link === '위임');
+  const dRef  = c.decrees.filter(d => d.link !== '위임');
+  const hasGos = [c.law, ...c.decrees, ...c.decrees.flatMap(d=>d.rules), ...c.rules_direct].some(x => x.deleg.includes('고시'));
+  const nRules = c.decrees.reduce((a,d)=>a+d.rules.length,0) + c.rules_direct.length;
+
+  // 요약 한 줄
+  let sum = '<div class="flow-row"><span class="pill law">법 제'+c.law.no+'조</span>';
+  sum += '<span class="arrow">→</span>';
+  sum += dMain.length ? dMain.map(d=>'<span class="pill decree">령 제'+d.no+'조</span>').join('') : '<span class="pill gos">령 위임 없음</span>';
+  if (nRules){ sum += '<span class="arrow">→</span>' + [...dMain.flatMap(d=>d.rules), ...c.rules_direct].map(r=>'<span class="pill rule">칙 제'+r.no+'조</span>').join(''); }
+  if (hasGos){ sum += '<span class="arrow">→</span><span class="pill gos">고시</span>'; }
+  sum += '</div>';
+
+  // 카드(법 먼저 만들어 idx 확보)
+  const lawHTML = card(c.law, idx);
+  let groups = '';
+  const mkGroup = (d) => {
+    const dh = card(d, idx);
+    const rs = d.rules.map(r => card(r, idx)).join('') || '<div class="empty">연결된 시행규칙 조문 없음</div>';
+    return '<div class="grp'+(d.rules.length?' has-r':'')+'"><div class="cell d">'+dh+'</div><div class="cell r">'+rs+'</div></div>';
+  };
+  dMain.forEach(d => groups += mkGroup(d));
+  if (c.rules_direct.length){
+    groups += '<div class="grp has-r"><div class="cell d"><div class="empty">법 → 시행규칙 <b>직접</b> 위임<br><small>시행령을 거치지 않고 법에서 바로 부령(시행규칙)으로 위임</small></div></div><div class="cell r">'+
+      c.rules_direct.map(r=>card(r, idx)).join('')+'</div></div>';
+  }
+  if (!dMain.length && !c.rules_direct.length){
+    groups += '<div class="empty">이 조문을 직접 위임 근거로 삼는 시행령·시행규칙 조문이 없습니다.</div>';
+  }
+  if (hasGos){
+    groups += '<div class="grp"><div class="cell d"><div class="empty k"><b>고시</b> — 위 조문에 “관세청장이 정하여 고시” 위임이 포함되어 있습니다.<br><small>고시 원문은 아직 적재 전입니다(BACKDATA에 고시 PDF 추가 시 연동).</small></div></div></div>';
+  }
+  if (dRef.length){
+    groups += '<details class="ref-list"><summary>단순 인용 조문 '+dRef.length+'건 (위임 근거는 아니지만 이 조문을 언급)</summary>'+
+      dRef.map(d => '<div class="grp"><div class="cell d">'+card(d, idx)+'</div><div class="cell r">'+d.rules.map(r=>card(r, idx)).join('')+'</div></div>').join('')+'</details>';
+  }
+
+  main.innerHTML =
+    '<div class="legend"><span class="lg"><i style="background:var(--law)"></i>법(관세법)</span><span class="lg"><i style="background:var(--dec)"></i>령(시행령)</span><span class="lg"><i style="background:var(--rul)"></i>칙(시행규칙)</span><span class="lg"><i style="background:var(--gos)"></i>고시</span><span class="lg"><mark class="d">위임 문구</mark></span></div>'+
+    '<div class="summary"><b>연계 흐름</b>'+sum+'</div>'+
+    '<div class="notice">연계는 하위 법령 본문에서 “법 제○조 / 영 제○조”를 인용한 지점을 자동 추출해 <b>위임</b>(근거 조문으로 직접 인용) / <b>인용</b>(단순 언급)으로 분류한 초안입니다.</div>'+
+    '<div class="flow"><div class="law-col">'+lawHTML+'</div><div><div class="colhead"><div>시행령</div><div>시행규칙</div></div>'+groups+'</div></div>'+
+    '<div class="foot">'+META.sources.map(esc).join('<br>')+'</div>';
+  document.querySelectorAll('.chip').forEach((b,k)=>b.setAttribute('aria-selected', k===i));
+  history.replaceState(null,'','#'+c.law.no);
+}
+
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (t.matches('.more')){
+    const cb = t.previousElementSibling; const open = cb.classList.toggle('clamp');
+    t.textContent = open ? '전문 보기 ▾' : '접기 ▴'; return;
+  }
+  if (document.body.classList.contains('quiz') && (t.matches('mark.d') || t.matches('.ref.hit'))){ t.classList.toggle('open'); return; }
+  const g = t.closest('.ref.go');
+  if (g){ const el = document.getElementById(g.dataset.t); if (el){ const cb = el.querySelector('.cb.clamp'); if (cb){cb.classList.remove('clamp'); const m=el.querySelector('.more'); if(m) m.textContent='접기 ▴';}
+      el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } }
+});
+
+// 상단 칩
+const chips = $('#chips');
+DATA.forEach((c,i) => {
+  const b = document.createElement('button'); b.className='chip'; b.role='tab';
+  b.textContent = '법 제'+c.law.no+'조 '+c.law.title.replace(/\s*등(?:으로 인한|에).*$/,'').slice(0,12);
+  b.onclick = () => { render(i); window.scrollTo({top:0}); };
+  chips.appendChild(b);
+});
+// 도구
+let fs = +(localStorage.getItem('law_fs')||15);
+const setFs = v => { fs = Math.min(21, Math.max(12, v)); document.documentElement.style.setProperty('--fs', fs+'px'); try{localStorage.setItem('law_fs', fs)}catch(e){} };
+setFs(fs);
+$('#fPlus').onclick = () => setFs(fs+1); $('#fMinus').onclick = () => setFs(fs-1);
+$('#quizBtn').onclick = e => { const on = document.body.classList.toggle('quiz'); e.currentTarget.setAttribute('aria-pressed', on);
+  document.querySelectorAll('.open').forEach(x=>x.classList.remove('open')); };
+
+const h = location.hash.slice(1); const start = DATA.findIndex(c => c.law.no === decodeURIComponent(h));
+render(start >= 0 ? start : 0);
+</script>
+</body>
+</html>

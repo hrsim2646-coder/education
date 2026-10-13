@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>관세법 법령 연계뷰</title>
+<style>
+:root{
+  --bg:#f4f6f9;--fg:#18202b;--mut:#667085;--card:#fff;--bd:#d8dde5;--side:#fff;--hl:#fff1a8;--acc:#2457d6;
+  --law:#1f4fd8;--dec:#14803c;--rul:#c2410c;--not:#6b7280;
+  --law-bg:#e8eefc;--dec-bg:#e3f5ea;--rul-bg:#fdeee3;--not-bg:#eceef1;
+  --w-d:#1e293b;--w-c:#7b8798;--w-p:#dc2626;--shadow:0 1px 2px rgba(0,0,0,.06);
+  --fs:15px;--hh:52px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#10141a;--fg:#e6e9ee;--mut:#98a2b3;--card:#181e27;--bd:#2c3542;--side:#141a22;--hl:#5b4b00;--acc:#7aa2ff;
+  --law:#8fb0ff;--dec:#6fd596;--rul:#ffa66b;--not:#aab2bf;
+  --law-bg:#1b2745;--dec-bg:#16301f;--rul-bg:#3a2415;--not-bg:#262c36;
+  --w-d:#e2e8f0;--w-c:#7f8aa0;--w-p:#ff6b6b;--shadow:none}}
+:root[data-theme=dark]{
+  --bg:#10141a;--fg:#e6e9ee;--mut:#98a2b3;--card:#181e27;--bd:#2c3542;--side:#141a22;--hl:#5b4b00;--acc:#7aa2ff;
+  --law:#8fb0ff;--dec:#6fd596;--rul:#ffa66b;--not:#aab2bf;
+  --law-bg:#1b2745;--dec-bg:#16301f;--rul-bg:#3a2415;--not-bg:#262c36;
+  --w-d:#e2e8f0;--w-c:#7f8aa0;--w-p:#ff6b6b;--shadow:none}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-size:var(--fs);line-height:1.6;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+#top{position:fixed;top:0;left:0;right:0;height:var(--hh);display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--card);border-bottom:1px solid var(--bd);z-index:50}
+#top h1{font-size:16px;margin:0;white-space:nowrap}
+#top .sp{flex:1}
+.ib{border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:5px 10px;font-size:13px;white-space:nowrap}
+.ib.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#qwrap{position:relative;flex:1;max-width:460px;min-width:90px}
+#q{width:100%;border:1px solid var(--bd);background:var(--bg);color:var(--fg);border-radius:20px;padding:7px 30px 7px 14px;font-size:14px;outline:none}
+#q:focus{border-color:var(--acc)}
+#qx{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--mut);font-size:16px;display:none}
+#tabs{display:flex;gap:4px}
+#tabs .ib{border-radius:8px}
+#app{position:fixed;top:var(--hh);left:0;right:0;bottom:0;display:grid;grid-template-columns:310px 1fr}
+#side{background:var(--side);border-right:1px solid var(--bd);overflow:auto;-webkit-overflow-scrolling:touch}
+#main{overflow:auto;position:relative;-webkit-overflow-scrolling:touch}
+.dtabs{display:flex;position:sticky;top:0;background:var(--side);z-index:2;border-bottom:1px solid var(--bd)}
+.dtabs button{flex:1;border:0;background:none;padding:9px 2px;font-size:13px;border-bottom:3px solid transparent;color:var(--mut)}
+.dtabs button.on{color:var(--fg);font-weight:700}
+.dtabs .c0.on{border-color:var(--law)}.dtabs .c1.on{border-color:var(--dec)}.dtabs .c2.on{border-color:var(--rul)}.dtabs .c3.on{border-color:var(--not)}
+.ch-g>summary{list-style:none;cursor:pointer;padding:7px 12px;font-size:12.5px;font-weight:700;background:var(--bg);border-bottom:1px solid var(--bd);color:var(--mut);position:sticky;top:38px}
+.ch-g>summary::-webkit-details-marker{display:none}
+.ch-g>summary::before{content:"▸ "}.ch-g[open]>summary::before{content:"▾ "}
+.row{display:flex;align-items:baseline;gap:6px;padding:6px 12px 6px 18px;border-bottom:1px solid var(--bd);cursor:pointer;font-size:13.5px}
+.row:hover{background:var(--bg)}
+.row.on{background:var(--hl)}
+.row .n{font-weight:700;white-space:nowrap}
+.row .t{flex:1;min-width:0}
+.row .k{font-size:11px;color:var(--mut);white-space:nowrap}
+.row.del{opacity:.5}
+.row .rv{color:#e08a00}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:5px;line-height:1.5;white-space:nowrap}
+.b0{background:var(--law-bg);color:var(--law)}.b1{background:var(--dec-bg);color:var(--dec)}.b2{background:var(--rul-bg);color:var(--rul)}.b3{background:var(--not-bg);color:var(--not)}
+#bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 14px;border-bottom:1px solid var(--bd);background:var(--card);position:sticky;top:0;z-index:20;font-size:12.5px}
+#bar .lg{display:inline-flex;align-items:center;gap:4px;cursor:pointer;user-select:none;border:1px solid var(--bd);border-radius:14px;padding:2px 9px 2px 6px}
+#bar .lg.off{opacity:.4}
+#bar svg{width:34px;height:8px}
+#graph{position:relative;padding:14px 16px 60px 24px;min-height:200px}
+#graph.cols{display:grid;grid-template-columns:var(--gt);column-gap:104px;align-items:start}
+#graph.stack{display:block;padding-left:64px}
+#wires{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:0}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0;position:relative;z-index:1}
+.colh{font-size:12.5px;font-weight:700;color:var(--mut);padding:2px 2px 0;display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px}
+#graph.stack .col{margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+.card.focus{border:2px solid var(--acc)}
+.card .ch{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:8px 10px;border-bottom:1px solid var(--bd);cursor:default}
+.card.d0 .ch{background:var(--law-bg)}.card.d1 .ch{background:var(--dec-bg)}.card.d2 .ch{background:var(--rul-bg)}.card.d3 .ch{background:var(--not-bg)}
+.card:not(.focus) .ch{cursor:pointer}
+.ch .no{font-weight:800}
+.ch .ti{font-weight:700;flex:1;min-width:120px}
+.ch .meta{font-size:11.5px;color:var(--mut);flex-basis:100%}
+.tag{font-size:11px;border:1px solid var(--bd);border-radius:10px;padding:0 7px;color:var(--mut);background:var(--card);white-space:nowrap}
+.tag.rv{color:#b45f00;border-color:#e0a050;cursor:pointer}
+.path{font-size:11.5px;color:var(--mut);padding:5px 10px 0}
+.pb{padding:6px 10px;margin:0;border-left:3px solid transparent;position:relative}
+.pb+.pb{border-top:1px dashed var(--bd)}
+.pb.hl{background:var(--hl)}
+.pb.pin{border-left-color:var(--acc)}
+.pb .hang{font-weight:700;margin-right:3px}
+.pb .tx{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.it{display:flex;gap:5px;margin-top:2px;padding-left:1em;white-space:pre-wrap}
+.it.l3{padding-left:2.2em}
+.it .k{flex:none;color:var(--mut);font-weight:600}
+.it .tx{flex:1;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+a.ref{color:var(--acc);text-decoration:underline dotted;cursor:pointer}
+mark.dl{background:none;border-bottom:2px solid;padding:0}
+mark.dl0{border-color:var(--dec);color:inherit}mark.dl1{border-color:var(--rul)}mark.dl2{border-color:var(--not)}
+mark.hm{background:var(--hl);color:inherit;border-radius:2px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.chip{font-size:11.5px;border:1px solid var(--bd);border-radius:10px;padding:0 8px;background:var(--bg);cursor:pointer;white-space:nowrap}
+.chip.ty-d{border-color:var(--w-d)}.chip.ty-p{border-color:var(--w-p);border-style:dotted;color:var(--w-p)}.chip.ty-c{border-style:dashed}
+.chip.gray{color:var(--mut);cursor:default;border-style:dashed}
+.bw.clampable:not(.open){max-height:9.5em;overflow:hidden;position:relative}
+.bw.clampable.ov:not(.open)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.4em;background:linear-gradient(rgba(255,255,255,0),var(--card))}
+.bt{display:block;border:0;background:none;color:var(--acc);font-size:12px;padding:2px 0 0;cursor:pointer}
+.more{display:block;width:100%;border:0;border-top:1px dashed var(--bd);background:var(--bg);color:var(--mut);padding:5px;font-size:12px}
+.foot{padding:6px 10px;font-size:11.5px;color:var(--mut);border-top:1px solid var(--bd);background:var(--bg)}
+.colmore{border:1px dashed var(--bd);background:var(--card);border-radius:8px;padding:8px;color:var(--mut);font-size:12.5px}
+.empty{color:var(--mut);font-size:13px;padding:10px;border:1px dashed var(--bd);border-radius:10px;background:var(--card)}
+.diffbox{padding:8px 10px;border-bottom:1px solid var(--bd);background:var(--bg);font-size:13.5px;white-space:pre-wrap}
+.diffbox del,.rvv del{background:#fde2e2;color:#b42318;text-decoration:line-through}
+.diffbox ins,.rvv ins{background:#dcf5df;color:#18672c;text-decoration:none}
+:root[data-theme=dark] del{background:#4a1d1d;color:#ffb4b4}:root[data-theme=dark] ins{background:#17391d;color:#a8f0b6}
+.diffbox .pl{font-weight:700;margin-top:4px}
+/* wires */
+.w .ln{fill:none;stroke-width:2;stroke-linecap:round}
+.w.ty-d .ln{stroke:var(--w-d)}
+.w.ty-c .ln{stroke:var(--w-c);stroke-dasharray:7 5;stroke-width:1.5}
+.w.ty-p .ln{stroke:var(--w-p);stroke-dasharray:1.5 5;stroke-width:2.2;opacity:.85}
+.w .hit{fill:none;stroke:transparent;stroke-width:12;pointer-events:stroke;cursor:pointer}
+.w .dot{fill:var(--card);stroke-width:2}
+.w.ty-d .dot{stroke:var(--w-d)}.w.ty-c .dot{stroke:var(--w-c)}.w.ty-p .dot{stroke:var(--w-p)}
+#graph.dimmed .w{opacity:.12}
+#graph.dimmed .w.on{opacity:1}
+#graph.dimmed .w.on .ln{stroke-width:3.4}
+.flash{animation:fl 1.2s}
+@keyframes fl{0%{box-shadow:0 0 0 4px var(--acc)}100%{box-shadow:0 0 0 0 transparent}}
+/* lists */
+.pane{max-width:960px;margin:0 auto;padding:16px 16px 60px}
+.pane h2{font-size:17px;margin:6px 0 10px}
+.res{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;margin-bottom:8px;cursor:pointer}
+.res:hover{border-color:var(--acc)}
+.res .sn{color:var(--mut);font-size:13px;margin-top:3px;word-break:keep-all;overflow-wrap:anywhere}
+.fl{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.rvbox{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:8px}
+.rvbox>summary{padding:8px 12px;cursor:pointer;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.rvv{padding:4px 12px 12px;white-space:pre-wrap;font-size:13.5px}
+table.info{border-collapse:collapse;width:100%;background:var(--card);font-size:13px}
+table.info td,table.info th{border:1px solid var(--bd);padding:6px 8px;text-align:left}
+.note{font-size:12.5px;color:var(--mut)}
+#scrim{display:none}
+@media (max-width:900px){
+  #app{grid-template-columns:1fr}
+  #side{position:fixed;top:var(--hh);bottom:0;left:0;width:min(86vw,340px);z-index:60;transform:translateX(-102%);transition:transform .2s;box-shadow:2px 0 12px rgba(0,0,0,.25)}
+  body.nav #side{transform:none}
+  body.nav #scrim{display:block;position:fixed;inset:var(--hh) 0 0 0;background:rgba(0,0,0,.35);z-index:55}
+  #top h1{display:none}
+  .hide-m{display:none}
+  .card .ch .ti{min-width:0;flex-basis:100%}
+}
+@media (min-width:901px){#btnNav{display:none}}
+</style>
+</head>
+<body>
+<header id="top">
+  <button class="ib" id="btnNav" aria-label="조문 목록">☰</button>
+  <h1>관세법 연계뷰</h1>
+  <div id="qwrap"><input id="q" type="search" placeholder="검색  (예: 천재지변 / 법 100 / 령 124의2)" autocomplete="off"><button id="qx" aria-label="지우기">✕</button></div>
+  <div id="tabs">
+    <button class="ib on" data-v="link">연계</button>
+    <button class="ib" data-v="search" id="tabS">검색</button>
+    <button class="ib" data-v="rev" id="tabR">개정·자료</button>
+  </div>
+  <div class="sp hide-m"></div>
+  <button class="ib hide-m" id="fm" title="글자 작게">가−</button>
+  <button class="ib hide-m" id="fp" title="글자 크게">가+</button>
+  <button class="ib hide-m" id="th" title="다크모드">◐</button>
+</header>
+<div id="scrim"></div>
+<div id="app">
+  <aside id="side"></aside>
+  <main id="main"></main>
+</div>
+
+<script>
+"use strict";
+const D = /*__DATA__*/null;
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CIRC = (() => { let s = ''; for (let c = 0x2460; c <= 0x2473; c++) s += String.fromCharCode(c); for (let c = 0x3251; c <= 0x325F; c++) s += String.fromCharCode(c); return s; })();
+const circ = pn => (pn == null || pn === '0') ? '' : (CIRC[Number(pn) - 1] || ('제' + pn + '항'));
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+/* ---------- 데이터 준비 ---------- */
+const docs = D.docs;
+const ARTS = docs.map((_, i) => D.arts[String(i)] || []);
+const AM = ARTS.map(l => new Map(l.map(a => [a.no, a])));
+const EDGES = D.edges.map(e => ({ fd: e[0], fn: e[1], fp: e[2], td: e[3], tn: e[4], tp: e[5], ty: e[6] }));
+const byArt = new Map();
+const pushM = (k, e) => { if (!byArt.has(k)) byArt.set(k, []); byArt.get(k).push(e); };
+EDGES.forEach(e => { pushM(e.fd + '|' + e.fn, e); pushM(e.td + '|' + e.tn, e); });
+const COLN = docs.map(d => d.col);
+const hasNotice = docs.some(d => d.col === 3);
+const TYN = { d: '위임', c: '인용', p: '벌칙' };
+const PRI = { d: 0, p: 1, c: 2 };
+const nkey = n => { const [a, b] = String(n).split('의'); return Number(a) * 1000 + Number(b || 0); };
+const dlabel = d => docs[d].label;
+const aname = (d, n) => `${dlabel(d)} 제${n}조`;
+// 가장 최근 개정 비교(문서별 마지막 전환)
+const REV = {}; // di -> {tr, map: no->change}
+D.rev.forEach(r => { REV[r.doc] = { tr: r, map: new Map(r.changes.map(c => [c.no, c])) }; });
+// 항별 연결 개수(사이드바 표시용)
+const linkCount = new Map();
+EDGES.forEach(e => {
+  [[e.fd, e.fn, e.td], [e.td, e.tn, e.fd]].forEach(([d, n, od]) => {
+    const k = d + '|' + n; if (!linkCount.has(k)) linkCount.set(k, [0, 0, 0, 0]);
+    linkCount.get(k)[COLN[od]]++;
+  });
+});
+
+/* ---------- 상태 ---------- */
+const S = { d: 0, n: null, view: 'link', q: '', f: { d: true, c: true, p: true }, lim: {}, expand: new Set(), open: new Set(), side: 0, pin: null, mode: store.get('mode', 'auto'), fs: Number(store.get('fs', 15)), showDiff: new Set(), scope: new Set(docs.map((_, i) => i)) };
+document.documentElement.style.setProperty('--fs', S.fs + 'px');
+if (store.get('theme')) document.documentElement.setAttribute('data-theme', store.get('theme'));
+
+/* ---------- 텍스트 렌더 ---------- */
+const DL = /대통령령(?:으로|에서|에)\s*정[가-힣]*|대통령령에\s*따라|[가-힣]{2,8}부령(?:으로|에서)\s*정[가-힣]*|총리령으로\s*정[가-힣]*|고시(?:하는|한다|하여|할|함|한)?/g;
+function terms() { return S.q.trim().split(/\s+/).filter(x => x && !/^(?:법|령|칙|영|규칙|고시)$/.test(x)); }
+function renderText(t, refs, hl) {
+  if (!t) return '';
+  const n = t.length, rf = new Array(n).fill(-1), dl = new Array(n).fill(-1), hm = new Array(n).fill(0);
+  (refs || []).forEach((r, i) => { for (let k = r[0]; k < r[1]; k++) rf[k] = i; });
+  let m; DL.lastIndex = 0;
+  while ((m = DL.exec(t))) { const c = m[0].startsWith('대통령령') ? 0 : m[0].startsWith('고시') ? 2 : /부령|총리령/.test(m[0]) ? 1 : 2; for (let k = m.index; k < m.index + m[0].length; k++) dl[k] = c; }
+  if (hl) { const low = t.toLowerCase(); for (const w of hl) { const lw = w.toLowerCase(); let p = 0; while ((p = low.indexOf(lw, p)) >= 0) { for (let k = p; k < p + lw.length; k++) hm[k] = 1; p += lw.length; } } }
+  let out = '', i = 0;
+  while (i < n) {
+    let j = i; while (j < n && rf[j] === rf[i] && dl[j] === dl[i] && hm[j] === hm[i]) j++;
+    let s = esc(t.slice(i, j));
+    if (hm[i]) s = `<mark class="hm">${s}</mark>`;
+    if (dl[i] >= 0) s = `<mark class="dl dl${dl[i]}">${s}</mark>`;
+    if (rf[i] >= 0) { const r = refs[rf[i]]; s = `<a class="ref" data-go="${r[2]}|${esc(r[3])}">${s}</a>`; }
+    out += s; i = j;
+  }
+  return out;
+}
+
+/* ---------- 연계 그래프 ---------- */
+function buildGraph(fd, fn) {
+  const fk = fd + '|' + fn, nodes = new Map();
+  const colKey = d => d === fd ? 'R' : COLN[d];
+  const mk = (d, n) => { const k = d + '|' + n; if (!nodes.has(k)) nodes.set(k, { k, d, n, art: AM[d].get(n), score: 1e9, pri: 9, hop: 1, col: colKey(d) }); return nodes.get(k); };
+  const focus = mk(fd, fn); focus.focus = true; focus.score = 0; focus.hop = 0; focus.col = COLN[fd];
+  const fa = AM[fd].get(fn); const porder = new Map(fa.p.map((p, i) => [p.n, i + 1]));
+  const ok = e => S.f[e.ty];
+  const cand = new Map();
+  for (const e of byArt.get(fk) || []) {
+    if (!ok(e)) continue;
+    const fromF = e.fd === fd && e.fn === fn;
+    const od = fromF ? e.td : e.fd, on = fromF ? e.tn : e.fn;
+    const fpn = fromF ? e.fp : e.tp;
+    const k = od + '|' + on; if (!cand.has(k)) cand.set(k, { d: od, n: on, score: 1e9, pri: 9, col: colKey(od) });
+    const c = cand.get(k); c.score = Math.min(c.score, fpn == null ? 50 : (porder.get(fpn) || 50)); c.pri = Math.min(c.pri, PRI[e.ty]);
+  }
+  const hidden = {};
+  const take = (list, tag) => {
+    const byCol = {};
+    list.forEach(c => (byCol[c.col] = byCol[c.col] || []).push(c));
+    const kept = [];
+    for (const col in byCol) {
+      const arr = byCol[col].sort((a, b) => a.pri - b.pri || a.score - b.score || nkey(a.n) - nkey(b.n));
+      const lim = S.lim[tag + col] || 10;
+      kept.push(...arr.slice(0, lim));
+      if (arr.length > lim) hidden[tag + col] = (hidden[tag + col] || 0) + arr.length - lim;
+    }
+    return kept;
+  };
+  take([...cand.values()], 'a').forEach(c => { const nd = mk(c.d, c.n); nd.score = c.score; nd.pri = c.pri; });
+  // 2단계: 이미 보이는 하위 노드를 인용한 더 하위 법령(위임만)
+  const cand2 = new Map();
+  for (const nd of [...nodes.values()]) {
+    if (nd.focus || nd.col === 'R' || COLN[nd.d] < COLN[fd]) continue;
+    for (const e of byArt.get(nd.k) || []) {
+      if (e.ty !== 'd' || !ok(e) || e.td + '|' + e.tn !== nd.k) continue;
+      if (COLN[e.fd] <= COLN[nd.d]) continue;
+      const k = e.fd + '|' + e.fn; if (nodes.has(k)) continue;
+      if (!cand2.has(k)) cand2.set(k, { d: e.fd, n: e.fn, score: nd.score + 0.1, pri: 0, col: COLN[e.fd] });
+      else cand2.get(k).score = Math.min(cand2.get(k).score, nd.score + 0.1);
+    }
+  }
+  take([...cand2.values()], 'b').forEach(c => { const nd = mk(c.d, c.n); nd.score = c.score; nd.pri = 0; nd.hop = 2; });
+  // 최종 간선: 초점과 맞닿은 간선 + 표시된 노드 간 위임 간선
+  const seen = new Set(), list = [];
+  nodes.forEach(nd => { for (const e of byArt.get(nd.k) || []) {
+    if (seen.has(e) || !ok(e)) continue;
+    const a = e.fd + '|' + e.fn, b = e.td + '|' + e.tn;
+    if (!nodes.has(a) || !nodes.has(b)) continue;
+    if (a !== fk && b !== fk && e.ty !== 'd') continue;
+    seen.add(e); list.push(e);
+  }});
+  nodes.forEach(nd => { nd.pns = new Set(); nd.hdr = false; });
+  list.forEach(e => {
+    const A = nodes.get(e.fd + '|' + e.fn), B = nodes.get(e.td + '|' + e.tn);
+    if (e.fp == null) A.hdr = true; else A.pns.add(e.fp);
+    if (e.tp == null) B.hdr = true; else B.pns.add(e.tp);
+  });
+  const cols = {};
+  nodes.forEach(nd => (cols[nd.col] = cols[nd.col] || []).push(nd));
+  for (const c in cols) cols[c].sort((a, b) => (a.focus ? -1 : b.focus ? 1 : 0) || a.score - b.score || nkey(a.n) - nkey(b.n));
+  return { nodes, edges: list, cols, hidden, focus };
+}
+
+/* ---------- 카드 ---------- */
+function blockHTML(nd, p, G, hl) {
+  const bid = `${nd.d}|${nd.n}|${p.n}`;
+  let h = `<div class="pb" data-b="${esc(bid)}"><div class="bw${nd.focus ? '' : ' clampable'}${S.open.has(bid) ? ' open' : ''}"><div class="tx">`;
+  const hang = p.c || (p.n !== '0' ? circ(p.n) : '');
+  if (hang) h += `<span class="hang">${hang}</span>`;
+  h += renderText(p.t, p.r, hl) + '</div>';
+  p.items.forEach(it => {
+    h += `<div class="it${it.l === 3 ? ' l3' : ''}"><span class="k">${esc(it.k)}</span><span class="tx">${renderText(it.t, it.r, hl)}</span></div>`;
+  });
+  h += '</div>';
+  // 연결 칩
+  const chips = []; const seen = new Set();
+  G.edges.forEach(e => {
+    const mine = (e.fd === nd.d && e.fn === nd.n && e.fp === p.n) ? [e.td, e.tn, e.tp, '→'] : (e.td === nd.d && e.tn === nd.n && e.tp === p.n) ? [e.fd, e.fn, e.fp, '←'] : null;
+    if (!mine) return;
+    const k = mine.join('|') + e.ty; if (seen.has(k)) return; seen.add(k);
+    chips.push(`<span class="chip ty-${e.ty}" data-go="${mine[0]}|${esc(mine[1])}|${mine[2] == null ? '' : mine[2]}" title="${TYN[e.ty]}">${mine[3]} ${aname(mine[0], mine[1])}${circ(mine[2])}</span>`);
+  });
+  const full = p.t + ' ' + p.items.map(i => i.t).join(' ');
+  if (/고시/.test(full) && !hasNotice) chips.push(`<span class="chip gray" title="고시 PDF를 BACKDATA에 넣고 빌드하면 이 자리에 자동 연결됩니다">고시 위임 · 고시 미적재</span>`);
+  if (chips.length) h += `<div class="chips">${chips.slice(0, 8).join('')}${chips.length > 8 ? `<span class="chip gray">+${chips.length - 8}</span>` : ''}</div>`;
+  return h + '</div>';
+}
+function cardHTML(nd, G, hl) {
+  const a = nd.art; if (!a) return '';
+  const di = nd.d, key = nd.k, isF = !!nd.focus;
+  let shown = a.p.filter(p => nd.pns.has(p.n));
+  const all = isF || S.expand.has(key) || a.p.length <= 2;
+  const list = all ? a.p : (shown.length ? shown : [a.p[0]]);
+  let h = `<div class="card d${COLN[di]}${isF ? ' focus' : ''}" data-k="${esc(key)}"><div class="ch" ${isF ? '' : `data-go="${esc(key)}" title="이 조문을 중심으로 보기"`}>`;
+  h += `<span class="badge b${COLN[di]}">${dlabel(di)}${docs[di].col === 3 ? '' : ''}</span><span class="no">제${esc(a.no)}조</span><span class="ti">${a.del ? '삭제' : esc(a.title)}</span>`;
+  if (a.last) h += `<span class="tag" title="${esc(a.am.join(' '))}">개정 ${a.last.replace(/-/g, '.')}</span>`;
+  const rv = REV[di] && REV[di].map.get(a.no);
+  if (rv) h += `<span class="tag rv" data-diff="${esc(key)}">${rv.kind === 'add' ? '신설' : rv.kind === 'del' ? '삭제' : '개정'} · 변경 전/후</span>`;
+  if (docs[di].col === 3) h += `<span class="meta">${esc(docs[di].name)}</span>`;
+  h += '</div>';
+  if (isF && (a.ch || a.sec)) h += `<div class="path">${esc([a.ch, a.sec].filter(Boolean).join(' › '))}</div>`;
+  if (rv && S.showDiff.has(key)) h += diffHTML(rv);
+  if (a.del) h += `<div class="pb" data-b="${esc(key + '|0')}"><div class="tx">삭제</div></div>`;
+  else {
+    list.forEach(p => { h += blockHTML(nd, p, G, hl); });
+    const rest = a.p.length - list.length;
+    if (rest > 0) h += `<button class="more" data-exp="${esc(key)}">⋯ 다른 ${rest}개 항 전체 보기</button>`;
+  }
+  if (isF && a.nt.length) h += `<div class="foot">${esc(a.nt.join('  '))}</div>`;
+  return h + '</div>';
+}
+function diffHTML(c) {
+  let h = '<div class="diffbox">';
+  if (c.kind === 'add') h += '<b>이번 개정에서 신설된 조문입니다.</b>';
+  if (c.tb) h += `<div>제목: <del>${esc(c.tb)}</del> → <ins>${esc(c.title)}</ins></div>`;
+  (c.paras || []).forEach(p => { h += `<div class="pl">${p.pn === '0' ? '본문' : circ(p.pn) + ' 항'}</div>` + opsHTML(p.ops); });
+  return h + '</div>';
+}
+function opsHTML(ops) { return ops.map(o => o[0] === '=' ? esc(o[1]) : o[0] === '-' ? `<del>${esc(o[1])}</del>` : `<ins>${esc(o[1])}</ins>`).join(''); }
+
+/* ---------- 연계 화면 ---------- */
+let G = null, MODE = 'cols';
+function renderLink(keepScroll) {
+  const main = $('#main');
+  if (S.n == null || !AM[S.d].get(S.n)) { main.innerHTML = '<div class="pane"><div class="empty">왼쪽에서 조문을 선택하세요.</div></div>'; return; }
+  const sc = keepScroll ? main.scrollTop : 0;
+  G = buildGraph(S.d, S.n);
+  const wide = main.clientWidth >= 980;
+  MODE = S.mode === 'cols' ? 'cols' : S.mode === 'stack' ? 'stack' : (wide ? 'cols' : 'stack');
+  const hl = terms();
+  const colIds = [0, 1, 2, 3].filter(c => c < 3 || hasNotice || MODE === 'cols');
+  if ((G.cols.R || []).length || G.hidden.aR) {
+    const fc = COLN[S.d], ix = colIds.indexOf(fc);
+    if (MODE === 'cols' && fc === 0) colIds.unshift('R'); else colIds.splice(ix + 1, 0, 'R');
+  }
+  const nc = colIds.length;
+  let h = `<div id="bar"><b>${aname(S.d, S.n)}</b> 연계 ·
+    ${['d', 'c', 'p'].map(t => `<span class="lg ${S.f[t] ? '' : 'off'}" data-f="${t}"><svg viewBox="0 0 34 8"><line x1="0" y1="4" x2="34" y2="4" stroke="${t === 'd' ? 'var(--w-d)' : t === 'c' ? 'var(--w-c)' : 'var(--w-p)'}" stroke-width="${t === 'p' ? 2.6 : 2}" ${t === 'c' ? 'stroke-dasharray="7 5"' : t === 'p' ? 'stroke-dasharray="1.5 5" stroke-linecap="round"' : ''}/></svg>${TYN[t]}${t === 'd' ? '(위임)' : t === 'c' ? '(단순 인용)' : '(벌칙)'}</span>`).join('')}
+    <span class="lg" data-mode="1" title="배치 전환">${MODE === 'cols' ? '▥ 열 배치' : '☰ 세로 배치'}</span>
+    <span class="note">선에 마우스를 올리거나 항을 누르면 연결이 강조됩니다</span></div>`;
+  const gt = colIds.map(c => (c === 3 && !hasNotice) ? 'minmax(130px,.45fr)' : 'minmax(230px,1fr)').join(' ');
+  h += `<div id="graph" class="${MODE}" style="--nc:${nc};--gt:${gt}"><svg id="wires"></svg>`;
+  colIds.forEach(c => {
+    const arr = (G.cols[c] || []);
+    const hid = (G.hidden['a' + c] || 0) + (G.hidden['b' + c] || 0);
+    const head = c === 'R' ? `<span class="badge b${COLN[S.d]}">${dlabel(S.d)}</span>같은 ${dlabel(S.d)} 안의 연계 조문 <span class="note">(벌칙·인용)</span>` : `<span class="badge b${c}">${['법', '령', '칙', '고시'][c]}</span>${['관세법', '관세법 시행령', '관세법 시행규칙', ''][c]}`;
+    h += `<div class="col" data-c="${c}"><div class="colh">${head}<span class="note">${arr.length ? arr.length + '개 조' : ''}</span></div>`;
+    if (!arr.length) h += `<div class="empty">${c === 3 && !hasNotice ? '고시 PDF를 BACKDATA에 추가하고 빌드하면 이 열에 자동으로 연결됩니다.' : '연결된 조문이 없습니다'}</div>`;
+    arr.forEach(nd => { h += cardHTML(nd, G, nd.focus ? hl : null); });
+    if (hid > 0) h += `<button class="colmore" data-lim="${c}">연계 조문 ${hid}개 더 보기</button>`;
+    h += '</div>';
+  });
+  h += '</div>';
+  main.innerHTML = h;
+  main.scrollTop = sc;
+  requestAnimationFrame(() => { clampPass(); alignCols(); drawWires(); if (!keepScroll) main.scrollTop = 0; });
+}
+function clampPass() {
+  const root = $('#graph'); if (!root) return;
+  $$('.bt', root).forEach(b => b.remove());
+  $$('.bw.clampable', root).forEach(w => {
+    w.classList.remove('ov');
+    if (!w.classList.contains('open') && w.scrollHeight > w.clientHeight + 6) {
+      w.classList.add('ov'); w.insertAdjacentHTML('afterend', '<button class="bt" data-open="1">⋯ 이 항 전체 보기</button>');
+    } else if (w.classList.contains('open')) {
+      w.insertAdjacentHTML('afterend', '<button class="bt" data-open="1">▲ 접기</button>');
+    }
+  });
+}
+function alignCols() {
+  const root = $('#graph'); if (!root || MODE !== 'cols' || !G) return;
+  const cols = $$('.col', root); $$('.card', root).forEach(k => { k.style.marginTop = ''; });
+  const ids = cols.map(c => c.dataset.c);
+  const fcard = root.querySelector('.card.focus'); if (!fcard) return;
+  const fcol = fcard.closest('.col').dataset.c, fi = ids.indexOf(fcol);
+  const order = [...ids.slice(fi + 1), ...ids.slice(0, fi).reverse()];
+  const cardCol = new Map(); $$('.card', root).forEach(k => cardCol.set(k.dataset.k, k.closest('.col').dataset.c));
+  const done = new Set([fcol]);
+  order.forEach(ci => {
+    const col = cols[ids.indexOf(ci)]; if (!col) return;
+    $$('.card', col).forEach(card => {
+      const k = card.dataset.k; let want = null; const R0 = root.getBoundingClientRect();
+      G.edges.forEach(e => {
+        let other = null;
+        if (e.fd + '|' + e.fn === k) other = [e.td, e.tn, e.tp]; else if (e.td + '|' + e.tn === k) other = [e.fd, e.fn, e.fp]; else return;
+        if (!done.has(cardCol.get(other[0] + '|' + other[1]))) return;
+        const el = findEl(other[0], other[1], other[2]); if (!el) return;
+        const r = el.getBoundingClientRect(); const y = r.top - R0.top + Math.min(18, r.height / 2);
+        want = want == null ? y : Math.min(want, y);
+      });
+      if (want == null) return;
+      const cur = card.getBoundingClientRect().top - R0.top;
+      const m = want - 22 - cur;
+      if (m > 0) card.style.marginTop = m + 'px';
+    });
+    done.add(ci);
+  });
+}
+function findEl(d, n, p) {
+  const root = $('#graph');
+  if (p != null) { const el = root.querySelector(`.pb[data-b="${CSS.escape(`${d}|${n}|${p}`)}"]`); if (el) return el; }
+  const card = root.querySelector(`[data-k="${CSS.escape(d + '|' + n)}"]`);
+  return card ? (card.querySelector('.ch') || card) : null;
+}
+function drawWires() {
+  const root = $('#graph'); if (!root || !G) return;
+  const svg = $('#wires'), R = root.getBoundingClientRect();
+  svg.setAttribute('width', root.scrollWidth); svg.setAttribute('height', root.scrollHeight);
+  const used = new Map(), items = [];
+  const slot = el => { const c = (used.get(el) || 0); used.set(el, c + 1); return c; };
+  G.edges.forEach(e => {
+    const a = findEl(e.td, e.tn, e.tp), b = findEl(e.fd, e.fn, e.fp); // a=인용당한 쪽(상위), b=인용한 쪽(하위)
+    if (!a || !b || a === b) return;
+    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+    const ya = ra.top - R.top + Math.min(18, ra.height / 2) + slot(a) * 5 - 4;
+    const yb = rb.top - R.top + Math.min(18, rb.height / 2) + slot(b) * 5 - 4;
+    let kind = 'arc';
+    if (MODE === 'cols') { if (ra.right <= rb.left + 2) kind = 'ab'; else if (rb.right <= ra.left + 2) kind = 'ba'; }
+    items.push({ e, a, b, ra, rb, ya, yb, kind });
+  });
+  const lanes = new Map();
+  const arcs = items.filter(x => x.kind === 'arc');
+  arcs.sort((p, q) => Math.min(p.ya, p.yb) - Math.min(q.ya, q.yb));
+  arcs.forEach(x => {
+    const gk = MODE === 'stack' ? 'all' : x.a.closest('.col').dataset.c;
+    if (!lanes.has(gk)) lanes.set(gk, []);
+    const L = lanes.get(gk), lo = Math.min(x.ya, x.yb), hi = Math.max(x.ya, x.yb);
+    let li = L.findIndex(end => end < lo - 6);
+    if (li < 0) { li = L.length; L.push(0); }
+    L[li] = hi; x.lane = li;
+  });
+  let out = '';
+  items.forEach(x => {
+    const { e, ra, rb } = x; let d, ax, bx; const ay = x.ya, by = x.yb;
+    if (x.kind === 'arc') {
+      const lx = Math.min(ra.left, rb.left) - R.left, off = 12 + ((x.lane || 0) % 8) * 5;
+      ax = ra.left - R.left; bx = rb.left - R.left;
+      d = `M${ax},${ay} C${lx - off},${ay} ${lx - off},${by} ${bx},${by}`;
+    } else if (x.kind === 'ab') {
+      ax = ra.right - R.left; bx = rb.left - R.left; const dx = Math.max(30, (bx - ax) * 0.5);
+      d = `M${ax},${ay} C${ax + dx},${ay} ${bx - dx},${by} ${bx},${by}`;
+    } else {
+      ax = ra.left - R.left; bx = rb.right - R.left; const dx = Math.max(30, (ax - bx) * 0.5);
+      d = `M${ax},${ay} C${ax - dx},${ay} ${bx + dx},${by} ${bx},${by}`;
+    }
+    const ida = `${e.td}|${e.tn}|${e.tp == null ? '' : e.tp}`, idb = `${e.fd}|${e.fn}|${e.fp == null ? '' : e.fp}`;
+    out += `<g class="w ty-${e.ty}" data-wa="${esc(ida)}" data-wb="${esc(idb)}"><title>${aname(e.fd, e.fn)}${circ(e.fp)} → ${aname(e.td, e.tn)}${circ(e.tp)} (${TYN[e.ty]})</title><path class="hit" d="${d}"/><path class="ln" d="${d}"/><circle class="dot" cx="${ax}" cy="${ay}" r="3.4"/><circle class="dot" cx="${bx}" cy="${by}" r="3.4"/></g>`;
+  });
+  svg.innerHTML = out;
+  applyHighlight();
+}
+function endpointId(el) {
+  if (el.dataset.b) return el.dataset.b;
+  const c = el.closest('.card'); return c ? c.dataset.k : '';
+}
+function applyHighlight(hoverId) {
+  const root = $('#graph'); if (!root) return;
+  const id = hoverId || S.pin;
+  $$('.pb.hl', root).forEach(e => e.classList.remove('hl'));
+  $$('.w.on', root).forEach(e => e.classList.remove('on'));
+  if (!id) { root.classList.remove('dimmed'); return; }
+  const parts = id.split('|'); const isCard = parts.length === 2;
+  let any = false;
+  $$('.w', root).forEach(w => {
+    const match = [w.dataset.wa, w.dataset.wb].some(x => isCard ? (x.split('|').slice(0, 2).join('|') === id) : (x === id || x === parts.slice(0, 2).join('|') + '|'));
+    if (match) { w.classList.add('on'); any = true;
+      [w.dataset.wa, w.dataset.wb].forEach(x => { const t = x.endsWith('|') ? x.slice(0, -1) : x; const el = root.querySelector(`.pb[data-b="${CSS.escape(t)}"]`); if (el) el.classList.add('hl'); });
+    }
+  });
+  root.classList.toggle('dimmed', any);
+}
+
+/* ---------- 사이드바 ---------- */
+function renderSide() {
+  const side = $('#side');
+  let h = '<div class="dtabs">' + docs.map((d, i) => `<button class="c${d.col}${S.side === i ? ' on' : ''}" data-sd="${i}" title="${esc(d.name)}">${d.label}</button>`).join('') + '</div>';
+  let last = null, open = false;
+  const arts = ARTS[S.side], curOn = S.d === S.side ? S.n : null;
+  const groups = [];
+  arts.forEach(a => { const g = a.ch || '(장 구분 없음)'; if (!groups.length || groups[groups.length - 1].g !== g) groups.push({ g, l: [] }); groups[groups.length - 1].l.push(a); });
+  groups.forEach(gr => {
+    const has = gr.l.some(a => a.no === curOn);
+    h += `<details class="ch-g" ${has ? 'open' : ''}><summary>${esc(gr.g)} <span class="k">(${gr.l.length})</span></summary>`;
+    gr.l.forEach(a => {
+      const lc = linkCount.get(S.side + '|' + a.no) || [0, 0, 0, 0];
+      const k = ['법', '령', '칙', '고시'].map((n, i) => lc[i] ? n + lc[i] : '').filter(Boolean).join(' ');
+      const rv = REV[S.side] && REV[S.side].map.has(a.no);
+      h += `<div class="row${a.no === curOn ? ' on' : ''}${a.del ? ' del' : ''}" data-go="${S.side}|${esc(a.no)}"><span class="n">제${esc(a.no)}조</span><span class="t">${a.del ? '삭제' : esc(a.title)}</span>${rv ? '<span class="rv">●</span>' : ''}<span class="k">${k}</span></div>`;
+    });
+    h += '</details>';
+  });
+  side.innerHTML = h;
+  const on = $('.row.on', side); if (on) on.scrollIntoView({ block: 'center' });
+}
+
+/* ---------- 검색 ---------- */
+const SIDX = docs.map((_, di) => ARTS[di].map(a => ({ a, di, tl: (a.title || '').toLowerCase(), tx: (a.title + ' ' + a.p.map(p => p.t + ' ' + p.items.map(i => i.k + ' ' + i.t).join(' ')).join(' ')).toLowerCase() })));
+function doSearch() {
+  const q = S.q.trim(); const res = [];
+  const jm = q.match(/^(법|령|영|칙|규칙|고시)?\s*(?:제)?\s*(\d+)\s*조?\s*(?:의\s*(\d+))?\s*조?$/);
+  const pm = { '법': 0, '령': 1, '영': 1, '칙': 2, '규칙': 2, '고시': 3 };
+  if (jm) {
+    const no = jm[2] + (jm[3] ? '의' + jm[3] : '');
+    docs.forEach((d, di) => { if ((jm[1] == null || pm[jm[1]] === d.col) && AM[di].has(no) && S.scope.has(di)) res.push({ di, a: AM[di].get(no), score: 1000, sn: '' }); });
+  }
+  const tk = terms();
+  if (tk.length) {
+    const tl = tk.map(x => x.toLowerCase());
+    SIDX.forEach((arr, di) => { if (!S.scope.has(di)) return; arr.forEach(x => {
+      if (!tl.every(w => x.tx.includes(w))) return;
+      let sc = 0; tl.forEach(w => { if (x.tl.includes(w)) sc += 10; sc += Math.min(5, x.tx.split(w).length - 1); });
+      if (res.some(r => r.di === di && r.a === x.a)) return;
+      const i = x.tx.indexOf(tl[0]); const full = (x.a.title + ' ' + x.a.p.map(p => p.t + ' ' + p.items.map(i2 => i2.k + ' ' + i2.t).join(' ')).join(' '));
+      const st = Math.max(0, i - 40); res.push({ di, a: x.a, score: sc, sn: (st > 0 ? '…' : '') + full.slice(st, i + 100) });
+    }); });
+  }
+  res.sort((p, q2) => q2.score - p.score || p.di - q2.di || nkey(p.a.no) - nkey(q2.a.no));
+  return res;
+}
+function renderSearch() {
+  const res = doSearch(), tk = terms();
+  let h = `<div class="pane"><h2>검색 결과 ${res.length}건 <span class="note">“${esc(S.q)}”</span></h2><div class="fl">` +
+    docs.map((d, i) => `<span class="lg ib ${S.scope.has(i) ? 'on' : ''}" data-sc="${i}">${d.label} ${esc(d.name.replace('관세법 ', ''))}</span>`).join('') + '</div>';
+  if (!S.q.trim()) h += '<div class="empty">검색어를 입력하세요. 단어(공백으로 AND), 또는 “법 100”, “령 124의2”처럼 조문 번호로 바로 이동할 수 있습니다.</div>';
+  res.slice(0, 200).forEach(r => {
+    h += `<div class="res" data-go="${r.di}|${esc(r.a.no)}"><span class="badge b${docs[r.di].col}">${docs[r.di].label}</span> <b>제${esc(r.a.no)}조</b> ${esc(r.a.title)} <span class="note">${esc(r.a.ch || '')}</span><div class="sn">${renderText(r.sn, null, tk)}</div></div>`;
+  });
+  if (res.length > 200) h += '<div class="note">상위 200건만 표시했습니다. 검색어를 더 구체적으로 입력하세요.</div>';
+  h += '</div>';
+  $('#main').innerHTML = h; $('#main').scrollTop = 0;
+  $('#tabS').textContent = res.length ? `검색 ${res.length}` : '검색';
+}
+
+/* ---------- 개정/자료 ---------- */
+function renderRev() {
+  let h = '<div class="pane"><h2>개정 이력 (변경 전 → 후)</h2>';
+  if (!D.rev.length) h += '<div class="empty">아직 비교할 이전 버전이 없습니다. 개정된 법령 PDF를 BACKDATA 폴더에 추가하고 빌드하면, 직전 버전과 자동 비교하여 조문별 <del>삭제</del>/<ins>추가</ins> 내용이 여기에 표시되고 해당 조문 카드에도 “변경 전/후” 버튼이 생깁니다. (이전 버전은 DATA/snapshots에 자동 보관됩니다)</div>';
+  D.rev.slice().reverse().forEach(r => {
+    h += `<h2 style="font-size:15px">${esc(docs[r.doc].name)} · ${r.from.eff} → ${r.to.eff} <span class="note">${esc(r.to.promul)}</span></h2>`;
+    if (!r.changes.length) h += '<div class="note">조문 변경 없음</div>';
+    r.changes.forEach(c => {
+      h += `<details class="rvbox"><summary><span class="badge b${docs[r.doc].col}">${docs[r.doc].label}</span><b>제${esc(c.no)}조</b> ${esc(c.title)} <span class="tag">${c.kind === 'add' ? '신설' : c.kind === 'del' ? '삭제' : '개정'}</span> <a class="ref" data-go="${r.doc}|${esc(c.no)}">연계 보기</a></summary><div class="rvv">${diffHTML(c)}</div></details>`;
+    });
+  });
+  h += '<h2 style="margin-top:26px">자료 정보 (원문 PDF 기준)</h2><table class="info"><tr><th>구분</th><th>문서</th><th>공포</th><th>시행일</th><th>조문 수</th><th>원본 파일</th></tr>';
+  docs.forEach(d => { h += `<tr><td>${d.label}</td><td>${esc(d.name)}</td><td>${esc(d.promul)}</td><td>${d.eff}</td><td>${d.n}</td><td>${esc(d.pdf)}</td></tr>`; });
+  h += `</table><p class="note">본문은 위 PDF의 글자를 그대로 사용하며(부칙 앞까지, 삭제 조문 포함), 연계선은 조문 속 인용구(“법 제○조”, “영 제○조” 등)를 자동 추출한 것입니다. 개정 태그(&lt;개정 …&gt;)와 [본조신설] 등은 본문과 분리해 표시합니다. 생성: ${esc(D.built)}</p></div>`;
+  $('#main').innerHTML = h; $('#main').scrollTop = 0;
+}
+
+/* ---------- 라우팅/이벤트 ---------- */
+function setView(v) {
+  S.view = v; $$('#tabs .ib').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (v === 'link') renderLink(); else if (v === 'search') renderSearch(); else renderRev();
+}
+function focusArt(d, n, opts) {
+  d = Number(d); if (!AM[d] || !AM[d].has(n)) return;
+  S.d = d; S.n = n; S.side = d; S.lim = {}; S.pin = null;
+  if (S.view !== 'link') { S.view = 'link'; $$('#tabs .ib').forEach(b => b.classList.toggle('on', b.dataset.v === 'link')); }
+  const hash = '#' + docs[d].id + '/' + n;
+  if (location.hash !== hash) history.replaceState(null, '', hash);
+  renderSide(); renderLink(false);
+  document.body.classList.remove('nav');
+}
+function flashTo(id) {
+  const root = $('#graph'); if (!root) return false;
+  const el = root.querySelector(`.pb[data-b="${CSS.escape(id)}"]`) || root.querySelector(`[data-k="${CSS.escape(id.split('|').slice(0, 2).join('|'))}"]`);
+  if (!el) return false;
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1300); return true;
+}
+document.addEventListener('click', ev => {
+  const t = ev.target;
+  let el;
+  if ((el = t.closest('[data-open]'))) {
+    const w = el.previousElementSibling, pb = el.closest('.pb');
+    if (w && pb) { const id = pb.dataset.b; if (S.open.has(id)) S.open.delete(id); else S.open.add(id); w.classList.toggle('open'); clampPass(); alignCols(); drawWires(); }
+    ev.stopPropagation(); return;
+  }
+  if ((el = t.closest('[data-diff]'))) { const k = el.dataset.diff; S.showDiff.has(k) ? S.showDiff.delete(k) : S.showDiff.add(k); renderLink(true); ev.stopPropagation(); return; }
+  if ((el = t.closest('[data-exp]'))) { S.expand.add(el.dataset.exp); renderLink(true); return; }
+  if ((el = t.closest('[data-lim]'))) { const c = el.dataset.lim; S.lim['a' + c] = (S.lim['a' + c] || 10) + 12; S.lim['b' + c] = (S.lim['b' + c] || 10) + 12; renderLink(true); return; }
+  if ((el = t.closest('[data-f]'))) { S.f[el.dataset.f] = !S.f[el.dataset.f]; renderLink(true); return; }
+  if (t.closest('[data-mode]')) { S.mode = MODE === 'cols' ? 'stack' : 'cols'; store.set('mode', S.mode); renderLink(true); return; }
+  if ((el = t.closest('[data-sc]'))) { const i = Number(el.dataset.sc); S.scope.has(i) ? S.scope.delete(i) : S.scope.add(i); renderSearch(); return; }
+  if ((el = t.closest('[data-sd]'))) { S.side = Number(el.dataset.sd); renderSide(); return; }
+  if ((el = t.closest('[data-go]'))) {
+    const parts = el.dataset.go.split('|');
+    if (el.classList.contains('chip') && S.view === 'link' && flashTo(parts[0] + '|' + parts[1] + '|' + (parts[2] || ''))) return;
+    focusArt(parts[0], parts[1]); ev.stopPropagation(); return;
+  }
+  if ((el = t.closest('.w .hit, .w'))) { const g = t.closest('.w'); if (g) { S.pin = (S.pin === g.dataset.wb) ? null : g.dataset.wb; applyHighlight(); } return; }
+  if ((el = t.closest('.pb'))) { const id = el.dataset.b; S.pin = S.pin === id ? null : id; if (S.pin) el.classList.add('pin'); $$('.pb.pin').forEach(x => { if (x !== el || !S.pin) x.classList.remove('pin'); }); applyHighlight(); return; }
+}, true);
+document.addEventListener('mouseover', ev => {
+  const el = ev.target.closest && ev.target.closest('.pb, .w');
+  if (!el || S.view !== 'link') return;
+  applyHighlight(el.classList.contains('w') ? el.dataset.wb : el.dataset.b);
+});
+document.addEventListener('mouseout', ev => {
+  const el = ev.target.closest && ev.target.closest('.pb, .w');
+  if (el && S.view === 'link') applyHighlight();
+});
+$('#tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-v]'); if (b) setView(b.dataset.v); });
+let qt = null;
+$('#q').addEventListener('input', e => {
+  S.q = e.target.value; $('#qx').style.display = S.q ? 'block' : 'none';
+  clearTimeout(qt); qt = setTimeout(() => { if (S.q.trim()) setView('search'); else { $('#tabS').textContent = '검색'; if (S.view === 'search') setView('link'); else if (S.view === 'link') renderLink(true); } }, 220);
+});
+$('#q').addEventListener('keydown', e => { if (e.key === 'Escape') { $('#qx').click(); } if (e.key === 'Enter') { clearTimeout(qt); if (S.q.trim()) setView('search'); } });
+$('#qx').addEventListener('click', () => { $('#q').value = ''; S.q = ''; $('#qx').style.display = 'none'; $('#tabS').textContent = '검색'; if (S.view === 'search') setView('link'); else if (S.view === 'link') renderLink(true); });
+$('#btnNav').addEventListener('click', () => document.body.classList.toggle('nav'));
+$('#scrim').addEventListener('click', () => document.body.classList.remove('nav'));
+function setFs(v) { S.fs = Math.max(12, Math.min(22, v)); document.documentElement.style.setProperty('--fs', S.fs + 'px'); store.set('fs', S.fs); if (S.view === 'link') requestAnimationFrame(() => { clampPass(); alignCols(); drawWires(); }); }
+$('#fm').addEventListener('click', () => setFs(S.fs - 1));
+$('#fp').addEventListener('click', () => setFs(S.fs + 1));
+$('#th').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  const nx = cur === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', nx); store.set('theme', nx);
+});
+let rt = null;
+const redraw = () => { clearTimeout(rt); rt = setTimeout(() => { if (S.view !== 'link' || !G) return; const wide = $('#main').clientWidth >= 980; const m = S.mode === 'auto' ? (wide ? 'cols' : 'stack') : S.mode; if (m !== MODE) renderLink(true); else { clampPass(); alignCols(); drawWires(); } }, 120); };
+window.addEventListener('resize', redraw);
+if (window.ResizeObserver) new ResizeObserver(redraw).observe($('#main'));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S.view === 'link') drawWires(); });
+window.addEventListener('hashchange', () => { const m = decodeURIComponent(location.hash.slice(1)).split('/'); const di = docs.findIndex(d => d.id === m[0]); if (di >= 0 && m[1] && AM[di].has(m[1]) && !(S.d === di && S.n === m[1])) focusArt(di, m[1]); });
+
+/* ---------- 시작 ---------- */
+(function init() {
+  let d = 0, n = AM[0].has('100') ? '100' : (ARTS[0][0] || {}).no;
+  const m = decodeURIComponent(location.hash.slice(1)).split('/');
+  const di = docs.findIndex(x => x.id === m[0]);
+  if (di >= 0 && m[1] && AM[di].has(m[1])) { d = di; n = m[1]; }
+  S.d = d; S.n = n; S.side = d;
+  renderSide(); renderLink(false);
+})();
+</script>
+</body>
+</html>
